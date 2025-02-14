@@ -1,6 +1,7 @@
 package config
 
 import (
+	"context"
 	"log"
 	"os"
 
@@ -10,23 +11,33 @@ import (
 
 var MongoClient *mongo.Client
 
-func DB() {
+func ConnectDB() {
 	// Load .env file
 	mongostr := os.Getenv("MONGOSTRING")
 	if mongostr == "" {
-		log.Fatal("Error loading .env file")
+		log.Fatal("Error loading mongo string")
 	}
 
-	// Connect to MongoDB
-	client, err := mongo.NewClient(options.Client().ApplyURI(mongostr))
+	// Create MongoDB client options
+	client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(mongostr))
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal("Failed to connect to database", err)
+	}
+
+	// Check the connection
+	err = client.Ping(context.TODO(), nil)
+	if err != nil {
+		log.Fatal("Failed to verify database connection", err)
 	}
 
 	// Set the global MongoClient
 	MongoClient = client
 }
 
-func GetMongoClient() *mongo.Client {
+// return mongo client instance
+func GetDB() *mongo.Client {
+	if MongoClient == nil {
+		log.Fatal("MongoClient is not initialized. Connect to database first.")
+	}
 	return MongoClient
 }
