@@ -10,7 +10,7 @@ import (
 
 var MongoClient *mongo.Client
 
-func init() {
+func DB() {
 	// Load .env file
 	mongostr := os.Getenv("MONGOSTRING")
 	if mongostr == "" {
