@@ -16,14 +16,14 @@ import (
 )
 
 func main() {
-	// Initialize db connection
-	config.DB()
-
 	// Load .env file
 	err := godotenv.Load(".env")
 	if err != nil {
 		log.Fatal("Error loading .env file")
 	}
+
+	// Initialize db connection
+	config.ConnectDB()
 
 	// Create a new Fiber app
 	app := fiber.New()
@@ -38,13 +38,7 @@ func main() {
 	app.Use(logger.New(logger.Config{
 		Format: "${time} ${status} - ${latency} ${method} ${path}\n",
 	}))
-
-	// Save db connection in fiber app
-	app.Use(func(c *fiber.Ctx) error {
-		config.DB()
-		return c.Next()
-	})
-
+	
 	// Routes
 	routes.URL(app)
 
