@@ -1,7 +1,8 @@
 # elfume
-Back-end tugas besar Pemrograman IV
----
-Endpoint list (still running in localhost):
+
+# Endpoint list
+(still running in localhost):
+
 ## Authorization:
 - `/auth/register`
 - `/auth/login`
