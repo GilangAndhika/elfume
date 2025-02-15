@@ -1,17 +1,17 @@
 # elfume
 
 # Endpoint list:
-(still running in localhost):
+(http://localhost:3000):
 
-    ## Authorization:
-    - `/auth/register`
-    - `/auth/login`
+## Authorization:
+    /auth/register
+    /auth/login
 
-    ## User:
+## User:
     (not added yet)
 
-    ## Admin:
+## Admin:
     (not added yet)
 
-    ## Product:
+## Product:
     (not added yet)
