@@ -99,3 +99,55 @@ func GetAllPerfumes(c *fiber.Ctx) error {
 
 	return c.JSON(perfumes)
 }
+
+// GetPerfumeByID returns a single perfume by ID
+func GetPerfumeByID(c *fiber.Ctx) error {
+	perfumeID := c.Params("id")
+	perfume, err := repository.GetPerfumeByID(perfumeID)
+	if err != nil {
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+			"message": "Perfume not found",
+			"error":   err.Error(),
+		})
+	}
+
+	return c.JSON(perfume)
+}
+
+// GetFilteredPerfumes returns perfumes with optional filters
+func GetFilteredPerfumes(c *fiber.Ctx) error {
+	// Get query parameters (e.g., ?name=Dior&size=100ml)
+	filters := make(map[string]string)
+	if name := c.Query("name"); name != "" {
+		filters["name"] = name
+	}
+	if size := c.Query("size"); size != "" {
+		filters["sizes"] = size
+	}
+	if brand := c.Query("brand"); brand != "" {
+		filters["brand"] = brand
+	}
+	if category := c.Query("categories"); category != "" {
+		filters["categories"] = category
+	}
+	if types := c.Query("types"); types != "" {
+		filters["types"] = types
+	}
+	if price := c.Query("price"); price != "" {
+		filters["price"] = price
+	}
+
+	// Fetch perfumes with filters
+	perfumes, err := repository.GetFilteredPerfumes(filters)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"message": "Failed to fetch perfumes",
+			"error":   err.Error(),
+		})
+	}
+
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+		"message": "Perfumes retrieved successfully",
+		"perfumes": perfumes,
+	})
+}

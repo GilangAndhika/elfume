@@ -8,6 +8,7 @@ import (
 	"github.com/GilangAndhika/elfume/config"
 	"github.com/GilangAndhika/elfume/model"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 // CreatePerfume creates a new perfume product and uploads its image to GitHub
@@ -64,6 +65,54 @@ func GetAllPerfumes() ([]model.Perfume, error) {
 	defer cursor.Close(context.Background())
 
 	// Decode all perfumes
+	var perfumes []model.Perfume
+	if err = cursor.All(context.Background(), &perfumes); err != nil {
+		return nil, fmt.Errorf("failed to decode perfumes: %v", err)
+	}
+
+	return perfumes, nil
+}
+
+// Get a perfume by ID from the database
+func GetPerfumeByID(id string) (*model.Perfume, error) {
+	// Convert string ID to primitive.ObjectID
+	objID, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return nil, fmt.Errorf("invalid perfume ID format: %v", err)
+	}
+
+	// Get database connection
+	perfumeCollection := config.MongoDB.Collection("perfumes")
+
+	// Find perfume by ID
+	var perfume model.Perfume
+	err = perfumeCollection.FindOne(context.TODO(), bson.M{"_id": objID}).Decode(&perfume)
+	if err != nil {
+		return nil, fmt.Errorf("failed to find perfume: %v", err)
+	}
+
+	return &perfume, nil
+}
+
+// GetFilteredPerfumes retrieves perfumes with optional filters (e.g., by size, brand, category)
+func GetFilteredPerfumes(filters map[string]string) ([]model.Perfume, error) {
+	// Get database connection
+	perfumeCollection := config.MongoDB.Collection("perfumes")
+
+	// Build MongoDB query filter
+	query := bson.M{}
+	for key, value := range filters {
+		query[key] = bson.M{"$regex": value, "$options": "i"} // Case-insensitive search
+	}
+
+	// Find perfumes using filter
+	cursor, err := perfumeCollection.Find(context.TODO(), query)
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch perfumes: %v", err)
+	}
+	defer cursor.Close(context.Background())
+
+	// Decode results
 	var perfumes []model.Perfume
 	if err = cursor.All(context.Background(), &perfumes); err != nil {
 		return nil, fmt.Errorf("failed to decode perfumes: %v", err)
