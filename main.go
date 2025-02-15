@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"os"
 
 	"github.com/GilangAndhika/elfume/config"
 	"github.com/GilangAndhika/elfume/routes"
@@ -38,6 +39,12 @@ func main() {
 	// Routes
 	routes.URL(app)
 
-	// Listen to port 3000
-	log.Fatal(app.Listen(":3000"))
+	// Gunakan port dari environment variable Heroku
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "3000"
+	}
+
+	log.Printf("Starting server on port %s...\n", port)
+	log.Fatal(app.Listen(":" + port))
 }
