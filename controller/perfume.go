@@ -147,7 +147,35 @@ func GetFilteredPerfumes(c *fiber.Ctx) error {
 	}
 
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
-		"message": "Perfumes retrieved successfully",
+		"message":  "Perfumes retrieved successfully",
 		"perfumes": perfumes,
+	})
+}
+
+// UpdatePerfume handles updating an existing perfume
+func UpdatePerfume(c *fiber.Ctx) error {
+	// Get perfume ID from params
+	perfumeID := c.Params("id")
+
+	// Parse request body
+	var updatedPerfume model.Perfume
+	if err := c.BodyParser(&updatedPerfume); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"message": "Invalid request body",
+			"error":   err.Error(),
+		})
+	}
+
+	// Update the perfume in the database
+	err := repository.UpdatePerfume(perfumeID, updatedPerfume)
+	if err != nil {
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+			"message": "Failed to update perfume",
+			"error":   err.Error(),
+		})
+	}
+
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+		"message": "Perfume updated successfully",
 	})
 }

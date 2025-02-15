@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"time"
 
 	"github.com/GilangAndhika/elfume/config"
 	"github.com/GilangAndhika/elfume/model"
@@ -119,4 +120,47 @@ func GetFilteredPerfumes(filters map[string]string) ([]model.Perfume, error) {
 	}
 
 	return perfumes, nil
+}
+
+// UpdatePerfume updates a perfume in the database
+func UpdatePerfume(id string, updatedPerfume model.Perfume) error {
+	// Convert ID to ObjectID
+	objID, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return fmt.Errorf("invalid perfume ID format: %v", err)
+	}
+
+	// Get database connection
+	perfumeCollection := config.MongoDB.Collection("perfumes")
+
+	// Set updated timestamp
+	updatedPerfume.UpdatedAt = primitive.NewDateTimeFromTime(time.Now())
+
+	// Define the update operation
+	update := bson.M{
+		"$set": bson.M{
+			"name":        updatedPerfume.Name,
+			"brand":       updatedPerfume.Brand,
+			"types":       updatedPerfume.Types,
+			"categories":  updatedPerfume.Categories,
+			"sizes":       updatedPerfume.Sizes,
+			"price":       updatedPerfume.Price,
+			"description": updatedPerfume.Description,
+			"stock":       updatedPerfume.Stock,
+			"updated_at":  updatedPerfume.UpdatedAt,
+		},
+	}
+
+	// Perform the update
+	result, err := perfumeCollection.UpdateOne(context.TODO(), bson.M{"_id": objID}, update)
+	if err != nil {
+		return fmt.Errorf("failed to update perfume: %v", err)
+	}
+
+	// Check if the perfume was found and modified
+	if result.MatchedCount == 0 {
+		return fmt.Errorf("perfume not found")
+	}
+
+	return nil
 }
