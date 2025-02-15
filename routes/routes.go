@@ -2,21 +2,33 @@ package routes
 
 import (
 	"github.com/GilangAndhika/elfume/controller"
+	"github.com/GilangAndhika/elfume/middleware"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/golang-jwt/jwt/v4"
 )
 
 func URL(app *fiber.App) {
-	// Define the routes
+	// Default route
 	app.Get("/", func(c *fiber.Ctx) error {
 		return c.SendString("Hello, Elfume connected!")
 	})
+
+	// Auth routes (Registration & Login)
+	AuthRoutes := app.Group("/auth")
+	AuthRoutes.Post("/register", controller.Registration)
+	AuthRoutes.Post("/login", controller.Login)
 
 	// Role routes
 	RoleRoutes := app.Group("/role")
 	RoleRoutes.Post("/create", controller.CreateRole)
 
-	// Auth routes
-	AuthRoutes := app.Group("/auth")
-	AuthRoutes.Post("/register", controller.Registration)
+	// Protected route (requires authentication)
+	app.Get("/protected", middleware.JWTMiddleware(), func(c *fiber.Ctx) error {
+		user, ok := c.Locals("user").(jwt.MapClaims)
+		if !ok {
+			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"message": "Unauthorized"})
+		}
+		return c.JSON(fiber.Map{"message": "Access granted", "user": user})
+	})
 }

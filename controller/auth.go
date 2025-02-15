@@ -3,6 +3,7 @@ package controller
 import (
 	"time"
 
+	"github.com/GilangAndhika/elfume/middleware"
 	"github.com/GilangAndhika/elfume/model"
 	"github.com/GilangAndhika/elfume/repository"
 
@@ -95,8 +96,72 @@ func Registration(ctx *fiber.Ctx) error {
 		})
 	}
 
-
 	return ctx.Status(fiber.StatusCreated).JSON(fiber.Map{
 		"message": "Account created successfully",
+	})
+}
+
+// Login handles user login
+func Login(ctx *fiber.Ctx) error {
+	var user model.User
+
+	// Parse request body
+	if err := ctx.BodyParser(&user); err != nil {
+		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"message": "Invalid request body",
+			"error":   err.Error(),
+		})
+	}
+
+	// Find user by email or username
+	foundUser, err := repository.GetUserByEmailOrUsername(user.Email, user.Username)
+	if err != nil {
+		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"message": "Failed to find user",
+			"error":   err.Error(),
+		})
+	}
+	if foundUser == nil {
+		return ctx.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+			"message": "Invalid credentials",
+		})
+	}
+
+	// Compare passwords
+	match, err := repository.ComparePassword(foundUser.Password, user.Password)
+	if err != nil {
+		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"message": "Failed to compare passwords",
+			"error":   err.Error(),
+		})
+	}
+	if !match {
+		return ctx.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+			"message": "Invalid credentials",
+		})
+	}
+
+	// Generate JWT Token
+	token, err := middleware.GenerateJWT(foundUser)
+	if err != nil {
+		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"message": "Failed to generate token",
+			"error":   err.Error(),
+		})
+	}
+
+	// Set JWT token in HTTP-Only Cookie
+	ctx.Cookie(&fiber.Cookie{
+		Name:     "token",
+		Value:    token,
+		Expires:  time.Now().Add(2 * time.Hour), // Cookie expires in 2 hours
+		HTTPOnly: true,                          // Secure HTTP-Only
+		Secure:   true,                          // Set to true if using HTTPS
+	})
+
+	// Return token in response
+	return ctx.Status(fiber.StatusOK).JSON(fiber.Map{
+		"message": "Login successful",
+		"token":   token,
 	})
 }

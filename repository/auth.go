@@ -45,7 +45,7 @@ func CreateAccount(user *model.User) error {
 		"password":   user.Password,
 		"phone":      user.Phone,
 		"role_id":    user.RoleID,
-		"role_name":  user.RoleName, // Now automatically filled
+		"role_name":  user.RoleName,
 		"created_at": user.CreatedAt,
 		"updated_at": user.UpdatedAt,
 	})
@@ -53,39 +53,77 @@ func CreateAccount(user *model.User) error {
 	return err
 }
 
-// // GetUserbyEmail finds a user by email
-// func GetUserbyEmail(email string) (model.User, error) {
-// 	client := config.GetDB()
-// 	collection := client.Database("elfume").Collection("users")
+// GetUserByEmail finds a user by email
+func GetUserByEmail(email string) (*model.User, error) {
+	collection := config.MongoDB.Collection("users")
 
-// 	var user model.User
-// 	err := collection.FindOne(context.TODO(), bson.M{"email": email}).Decode(&user)
-// 	return user, err
-// }
+	var user model.User
+	err := collection.FindOne(context.TODO(), bson.M{"email": email}).Decode(&user)
+	if err != nil {
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			return nil, nil // Return nil if no user is found
+		}
+		return nil, err // Return error if database issue
+	}
+	return &user, nil
+}
 
-// // GetUserbyUsername finds a user by username
-// func GetUserbyUsername(username string) (model.User, error) {
-// 	client := config.GetDB()
-// 	collection := client.Database("elfume").Collection("users")
+// GetUserByUsername finds a user by username
+func GetUserByUsername(username string) (*model.User, error) {
+	collection := config.MongoDB.Collection("users")
 
-// 	var user model.User
-// 	err := collection.FindOne(context.TODO(), bson.M{"username": username}).Decode(&user)
-// 	return user, err
-// }
+	var user model.User
+	err := collection.FindOne(context.TODO(), bson.M{"username": username}).Decode(&user)
+	if err != nil {
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			return nil, nil // Return nil if no user is found
+		}
+		return nil, err // Return error if database issue
+	}
+	return &user, nil
+}
 
-// // GetUserbyID finds a user by ID
-// func GetUserbyID(id string) (model.User, error) {
-// 	client := config.GetDB()
-// 	collection := client.Database("elfume").Collection("users")
+// GetUserByID finds a user by ID
+func GetUserByID(id string) (*model.User, error) {
+	collection := config.MongoDB.Collection("users")
 
-// 	// Convert string to ObjectID
-// 	objID, err := primitive.ObjectIDFromHex(id)
-// 	if err != nil {
-// 		return model.User{}, err // Return an empty struct and an error
-// 	}
+	// Convert string to ObjectID
+	objID, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return nil, err // Return error if invalid ObjectID
+	}
 
-// 	// Find user by ID
-// 	var user model.User
-// 	err = collection.FindOne(context.TODO(), bson.M{"_id": objID}).Decode(&user)
-// 	return user, err
-// }
+	// Find user by ID
+	var user model.User
+	err = collection.FindOne(context.TODO(), bson.M{"_id": objID}).Decode(&user)
+	if err != nil {
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			return nil, nil // Return nil if no user is found
+		}
+		return nil, err // Return error if database issue
+	}
+	return &user, nil
+}
+
+// GetUserByEmailOrUsername finds a user by email or username
+func GetUserByEmailOrUsername(email, username string) (*model.User, error) {
+	collection := config.MongoDB.Collection("users")
+
+	// Query to find user by email OR username
+	filter := bson.M{
+		"$or": []bson.M{
+			{"email": email},
+			{"username": username},
+		},
+	}
+
+	var user model.User
+	err := collection.FindOne(context.TODO(), filter).Decode(&user)
+	if err != nil {
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			return nil, nil // Return nil if no user is found
+		}
+		return nil, err // Return database error
+	}
+	return &user, nil
+}
