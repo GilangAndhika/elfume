@@ -18,6 +18,14 @@ func URL(app *fiber.App) {
 	AuthRoutes := app.Group("/auth")
 	AuthRoutes.Post("/register", controller.Registration)
 	AuthRoutes.Post("/login", controller.Login)
+	AuthRoutes.Post("/logout", controller.Logout)
+
+	// User Routes
+	UserRoutes := app.Group("/user")
+	UserRoutes.Get("/all", controller.GetAllUsers)
+	UserRoutes.Get("/id/:id", controller.GetUserByID)
+	UserRoutes.Put("/update/:id", controller.UpdateUser)
+	UserRoutes.Delete("/delete/:id", controller.DeleteUser)
 
 	// Role routes
 	RoleRoutes := app.Group("/role")

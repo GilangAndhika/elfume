@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/GilangAndhika/elfume/config"
@@ -83,27 +84,27 @@ func GetUserByUsername(username string) (*model.User, error) {
 	return &user, nil
 }
 
-// GetUserByID finds a user by ID
+// GetUserByID retrieves a user from the database by their ID
 func GetUserByID(id string) (*model.User, error) {
-	collection := config.MongoDB.Collection("users")
-
-	// Convert string to ObjectID
+	// Convert string ID to primitive.ObjectID
 	objID, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
-		return nil, err // Return error if invalid ObjectID
+		return nil, fmt.Errorf("invalid user ID format: %v", err)
 	}
+
+	// Get database connection
+	userCollection := config.MongoDB.Collection("users")
 
 	// Find user by ID
 	var user model.User
-	err = collection.FindOne(context.TODO(), bson.M{"_id": objID}).Decode(&user)
+	err = userCollection.FindOne(context.TODO(), bson.M{"_id": objID}).Decode(&user)
 	if err != nil {
-		if errors.Is(err, mongo.ErrNoDocuments) {
-			return nil, nil // Return nil if no user is found
-		}
-		return nil, err // Return error if database issue
+		return nil, fmt.Errorf("failed to find user: %v", err)
 	}
+
 	return &user, nil
 }
+
 
 // GetUserByEmailOrUsername finds a user by email or username
 func GetUserByEmailOrUsername(email, username string) (*model.User, error) {
@@ -126,4 +127,89 @@ func GetUserByEmailOrUsername(email, username string) (*model.User, error) {
 		return nil, err // Return database error
 	}
 	return &user, nil
+}
+
+// Get all users from the database
+func GetAllUsers() ([]model.User, error) {
+	// Get database connection
+	userCollection := config.MongoDB.Collection("users")
+
+	// Find all users
+	cursor, err := userCollection.Find(context.TODO(), bson.M{})
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch users: %v", err)
+	}
+	defer cursor.Close(context.Background())
+
+	// Decode users
+	var users []model.User
+	if err = cursor.All(context.Background(), &users); err != nil {
+		return nil, fmt.Errorf("failed to decode users: %v", err)
+	}
+
+	return users, nil
+}
+
+// UpdateUser updates an existing user's information by ID
+func UpdateUser(id string, updatedUser model.User) error {
+	// Convert ID to ObjectID
+	objID, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return fmt.Errorf("invalid user ID format: %v", err)
+	}
+
+	// Get database connection
+	userCollection := config.MongoDB.Collection("users")
+
+	// Set updated timestamp
+	updatedUser.UpdatedAt = primitive.NewDateTimeFromTime(time.Now())
+
+	// Define the update operation
+	update := bson.M{
+		"$set": bson.M{
+			"username":  updatedUser.Username,
+			"email":     updatedUser.Email,
+			"phone":     updatedUser.Phone,
+			"role_id":   updatedUser.RoleID,
+			"updated_at": updatedUser.UpdatedAt,
+		},
+	}
+
+	// Perform the update
+	result, err := userCollection.UpdateOne(context.TODO(), bson.M{"_id": objID}, update)
+	if err != nil {
+		return fmt.Errorf("failed to update user: %v", err)
+	}
+
+	// Check if the user was found and modified
+	if result.MatchedCount == 0 {
+		return fmt.Errorf("user not found")
+	}
+
+	return nil
+}
+
+// DeleteUser deletes a user by ID
+func DeleteUser(id string) error {
+	// Convert string ID to primitive.ObjectID
+	objID, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return fmt.Errorf("invalid user ID format: %v", err)
+	}
+
+	// Get database connection
+	userCollection := config.MongoDB.Collection("users")
+
+	// Delete user by ID
+	result, err := userCollection.DeleteOne(context.TODO(), bson.M{"_id": objID})
+	if err != nil {
+		return fmt.Errorf("failed to delete user: %v", err)
+	}
+
+	// Check if any document was actually deleted
+	if result.DeletedCount == 0 {
+		return fmt.Errorf("user not found")
+	}
+
+	return nil
 }

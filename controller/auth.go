@@ -98,7 +98,7 @@ func Registration(ctx *fiber.Ctx) error {
 
 	return ctx.Status(fiber.StatusCreated).JSON(fiber.Map{
 		"message": "Account created successfully",
-		"user":   user,
+		"user":    user,
 	})
 }
 
@@ -164,5 +164,103 @@ func Login(ctx *fiber.Ctx) error {
 	return ctx.Status(fiber.StatusOK).JSON(fiber.Map{
 		"message": "Login successful",
 		"token":   token,
+	})
+}
+
+// GetAllUsers handles retrieving all users from the database
+func GetAllUsers(c *fiber.Ctx) error {
+	users, err := repository.GetAllUsers()
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"message": "Failed to fetch users",
+			"error":   err.Error(),
+		})
+	}
+
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+		"message": "Users retrieved successfully",
+		"users":   users,
+	})
+}
+
+// UpdateUser handles updating an existing user's information
+func UpdateUser(c *fiber.Ctx) error {
+	// Get user ID from params
+	userID := c.Params("id")
+
+	// Parse request body
+	var updatedUser model.User
+	if err := c.BodyParser(&updatedUser); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"message": "Invalid request body",
+			"error":   err.Error(),
+		})
+	}
+
+	// Update the user in the database
+	err := repository.UpdateUser(userID, updatedUser)
+	if err != nil {
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+			"message": "Failed to update user",
+			"error":   err.Error(),
+		})
+	}
+
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+		"message": "User updated successfully",
+	})
+}
+
+// DeleteUser handles deleting an existing user
+func DeleteUser(c *fiber.Ctx) error {
+	// Get user ID from URL params
+	userID := c.Params("id")
+
+	// Delete the user from the database
+	err := repository.DeleteUser(userID)
+	if err != nil {
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+			"message": "Failed to delete user",
+			"error":   err.Error(),
+		})
+	}
+
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+		"message": "User deleted successfully",
+	})
+}
+
+// GetUserByID handles retrieving a user by their ID
+func GetUserByID(c *fiber.Ctx) error {
+	// Get user ID from URL params
+	userID := c.Params("id")
+
+	// Retrieve the user from the database
+	user, err := repository.GetUserByID(userID)
+	if err != nil {
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+			"message": "User not found",
+			"error":   err.Error(),
+		})
+	}
+
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+		"message": "User retrieved successfully",
+		"user":    user,
+	})
+}
+
+// Logout handles user logout by clearing the JWT cookie
+func Logout(c *fiber.Ctx) error {
+	// Clear the JWT token by setting an expired cookie
+	c.Cookie(&fiber.Cookie{
+		Name:     "jwt",
+		Value:    "",
+		Expires:  time.Now().Add(-time.Hour),
+		HTTPOnly: true,
+	})
+
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+		"message": "Logged out successfully",
 	})
 }
