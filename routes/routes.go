@@ -30,6 +30,7 @@ func URL(app *fiber.App) {
 	PerfumeRoutes.Get("/id/:id", controller.GetPerfumeByID)
 	PerfumeRoutes.Get("/search", controller.GetFilteredPerfumes)
 	PerfumeRoutes.Put("/update/:id", controller.UpdatePerfume)
+	PerfumeRoutes.Delete("/delete/:id", controller.DeletePerfume)
 
 	// Protected route (requires authentication)
 	app.Get("/protected", middleware.JWTMiddleware(), func(c *fiber.Ctx) error {

@@ -164,3 +164,28 @@ func UpdatePerfume(id string, updatedPerfume model.Perfume) error {
 
 	return nil
 }
+
+// DeletePerfume deletes a perfume by its ID
+func DeletePerfume(id string) error {
+	// Convert string ID to primitive.ObjectID
+	objID, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return fmt.Errorf("invalid perfume ID format: %v", err)
+	}
+
+	// Get database connection
+	perfumeCollection := config.MongoDB.Collection("perfumes")
+
+	// Delete perfume by ID
+	result, err := perfumeCollection.DeleteOne(context.TODO(), bson.M{"_id": objID})
+	if err != nil {
+		return fmt.Errorf("failed to delete perfume: %v", err)
+	}
+
+	// Check if any document was actually deleted
+	if result.DeletedCount == 0 {
+		return fmt.Errorf("perfume not found")
+	}
+
+	return nil
+}

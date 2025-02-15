@@ -179,3 +179,22 @@ func UpdatePerfume(c *fiber.Ctx) error {
 		"message": "Perfume updated successfully",
 	})
 }
+
+// DeletePerfume handles deleting an existing perfume
+func DeletePerfume(c *fiber.Ctx) error {
+	// Get perfume ID from URL params
+	perfumeID := c.Params("id")
+
+	// Delete the perfume from the database
+	err := repository.DeletePerfume(perfumeID)
+	if err != nil {
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+			"message": "Failed to delete perfume",
+			"error":   err.Error(),
+		})
+	}
+
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+		"message": "Perfume deleted successfully",
+	})
+}
