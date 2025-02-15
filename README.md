@@ -1,5 +1,3 @@
-### **🚀 Updated `README.md`**
-
 # 🚀 Elfume API
 
 Welcome to the **Elfume API**, a RESTful API built using **Go Fiber**, **MongoDB**, and **JWT Authentication**.
