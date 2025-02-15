@@ -3,8 +3,8 @@ Back-end tugas besar Pemrograman IV
 ---
 Endpoint list (still running in localhost):
 ## Authorization:
-- '/auth/register'
-- '/auth/login'
+- `/auth/register`
+- `/auth/login`
 
 ## User
 (not added yet)
