@@ -23,6 +23,10 @@ func URL(app *fiber.App) {
 	RoleRoutes := app.Group("/role")
 	RoleRoutes.Post("/create", controller.CreateRole)
 
+	// Perfume routes
+	PerfumeRoutes := app.Group("/fume")
+	PerfumeRoutes.Post("/create", controller.CreatePerfume)
+
 	// Protected route (requires authentication)
 	app.Get("/protected", middleware.JWTMiddleware(), func(c *fiber.Ctx) error {
 		user, ok := c.Locals("user").(jwt.MapClaims)
