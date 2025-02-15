@@ -1,9 +1,3 @@
-Here's your **README.md** fully written in Markdown format. 🚀  
-
----
-
-### **📌 README.md**
-```markdown
 # 🚀 Elfume API
 
 Welcome to the **Elfume API**, a RESTful API built using **Go Fiber**, **MongoDB**, and **JWT Authentication**.
@@ -14,13 +8,12 @@ Welcome to the **Elfume API**, a RESTful API built using **Go Fiber**, **MongoDB
 - Secure JWT authentication with HTTP-only cookies
 - MongoDB as the database
 
----
 
 ## 📌 Installation & Setup
 
 ### 1️⃣ **Clone the repository**
 ```sh
-git clone https://github.com/your-username/elfume.git
+git clone https://github.com/GilangAndhika/elfume.git
 cd elfume
 ```
 
@@ -122,7 +115,7 @@ docker run -p 3000:3000 elfume-api
 ---
 
 ## 📌 Contributors
-- **Your Name** - [GitHub](https://github.com/your-username)
+- **Gilang Andhika** - [GitHub](https://github.com/GilangAndhika)
 
 ---
 
@@ -137,5 +130,3 @@ This project is licensed under the **MIT License**.
 - 🔑 **Authentication Details**
 - 🔐 **JWT Usage & Security**
 - 🚀 **Docker Instructions**
-
-Now your **README.md** is **professional and informative**! 🚀🔥 Let me know if you want to modify anything!
