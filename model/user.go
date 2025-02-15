@@ -11,6 +11,7 @@ type User struct {
 	Password  string             `json:"password" bson:"password"`
 	Phone     string             `json:"phone" bson:"phone"`
 	RoleID    primitive.ObjectID `json:"role_id" bson:"role_id"`
+	RoleName  string             `json:"role_name" bson:"role_name"`
 	CreatedAt primitive.DateTime `json:"created_at" bson:"created_at"`
 	UpdatedAt primitive.DateTime `json:"updated_at" bson:"updated_at"`
 }
@@ -21,6 +22,6 @@ type Role struct {
 }
 
 const (
-	RoleAdmin    = "1"
-	RoleCustomer = "2"
+	RoleAdmin    = "67aff19a533432bc3af88fe2"
+	RoleCustomer = "67aff183533432bc3af88fe1"
 )

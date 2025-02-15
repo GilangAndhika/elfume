@@ -2,129 +2,90 @@ package repository
 
 import (
 	"context"
-	"elfume/config"
-	"elfume/model"
+	"errors"
 	"time"
 
-	"github.com/gofiber/fiber/v2"
+	"github.com/GilangAndhika/elfume/config"
+	"github.com/GilangAndhika/elfume/model"
+
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 // CreateAccount handles user registration
-func CreateAccount(ctx *fiber.Ctx) error {
-	// Get database connection
-	client := config.GetDB()
-	collection := client.Database("elfume").Collection("users")
+func CreateAccount(user *model.User) error {
+	// Get MongoDB connection
+	usersCollection := config.MongoDB.Collection("users")
+	rolesCollection := config.MongoDB.Collection("roles")
 
-	// Parse request body into user struct
-	var user model.User
-	if err := ctx.BodyParser(&user); err != nil {
-		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"message": "Invalid request",
-		})
+	// Assign a new ObjectID if not set
+	if user.UserID.IsZero() {
+		user.UserID = primitive.NewObjectID()
 	}
+	user.CreatedAt = primitive.NewDateTimeFromTime(time.Now())
+	user.UpdatedAt = primitive.NewDateTimeFromTime(time.Now())
 
-	// Validate email format
-	if !IsEmailValid(user.Email) {
-		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"message": "Invalid email format",
-		})
-	}
-
-	// Validate phone number format & convert to international format
-	isPhoneValid, formattedPhone := IsPhoneValid(user.Phone)
-	if !isPhoneValid {
-		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"message": "Invalid phone number format",
-		})
-	}
-	user.Phone = formattedPhone
-
-	// Check if email already exists
-	emailExists, err := IsEmailExists(user.Email)
+	// Fetch role_name from roles collection using role_id
+	var role model.Role
+	err := rolesCollection.FindOne(context.TODO(), bson.M{"_id": user.RoleID}).Decode(&role)
 	if err != nil {
-		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"message": "Database error",
-		})
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			return errors.New("invalid role_id: role not found")
+		}
+		return err // Database error
 	}
-	if emailExists {
-		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"message": "Email already exists",
-		})
-	}
-
-	// Check if username already exists
-	usernameExists, err := IsUsernameExists(user.Username)
-	if err != nil {
-		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"message": "Database error",
-		})
-	}
-	if usernameExists {
-		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"message": "Username already exists",
-		})
-	}
-
-	// Hash password securely
-	hashedPassword := HashPassword(user.Password)
-	user.Password = hashedPassword
+	user.RoleName = role.RoleName // Assign the fetched role_name
 
 	// Insert user into the database
-	_, err = collection.InsertOne(ctx.Context(), bson.M{
+	_, err = usersCollection.InsertOne(context.TODO(), bson.M{
+		"_id":        user.UserID,
 		"username":   user.Username,
 		"email":      user.Email,
 		"password":   user.Password,
 		"phone":      user.Phone,
-		"role_id":    model.RoleCustomer,
-		"created_at": primitive.NewDateTimeFromTime(time.Now()),
-		"updated_at": primitive.NewDateTimeFromTime(time.Now()),
+		"role_id":    user.RoleID,
+		"role_name":  user.RoleName, // Now automatically filled
+		"created_at": user.CreatedAt,
+		"updated_at": user.UpdatedAt,
 	})
-	if err != nil {
-		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"message": "Failed to create account",
-		})
-	}
 
-	return ctx.Status(fiber.StatusCreated).JSON(fiber.Map{
-		"message": "Account created successfully",
-	})
+	return err
 }
 
-// GetUserbyEmail finds a user by email
-func GetUserbyEmail(email string) (model.User, error) {
-	client := config.GetDB()
-	collection := client.Database("elfume").Collection("users")
+// // GetUserbyEmail finds a user by email
+// func GetUserbyEmail(email string) (model.User, error) {
+// 	client := config.GetDB()
+// 	collection := client.Database("elfume").Collection("users")
 
-	var user model.User
-	err := collection.FindOne(context.TODO(), bson.M{"email": email}).Decode(&user)
-	return user, err
-}
+// 	var user model.User
+// 	err := collection.FindOne(context.TODO(), bson.M{"email": email}).Decode(&user)
+// 	return user, err
+// }
 
-// GetUserbyUsername finds a user by username
-func GetUserbyUsername(username string) (model.User, error) {
-	client := config.GetDB()
-	collection := client.Database("elfume").Collection("users")
+// // GetUserbyUsername finds a user by username
+// func GetUserbyUsername(username string) (model.User, error) {
+// 	client := config.GetDB()
+// 	collection := client.Database("elfume").Collection("users")
 
-	var user model.User
-	err := collection.FindOne(context.TODO(), bson.M{"username": username}).Decode(&user)
-	return user, err
-}
+// 	var user model.User
+// 	err := collection.FindOne(context.TODO(), bson.M{"username": username}).Decode(&user)
+// 	return user, err
+// }
 
-// GetUserbyID finds a user by ID
-func GetUserbyID(id string) (model.User, error) {
-	client := config.GetDB()
-	collection := client.Database("elfume").Collection("users")
+// // GetUserbyID finds a user by ID
+// func GetUserbyID(id string) (model.User, error) {
+// 	client := config.GetDB()
+// 	collection := client.Database("elfume").Collection("users")
 
-	// Convert string to ObjectID
-	objID, err := primitive.ObjectIDFromHex(id)
-	if err != nil {
-		return model.User{}, err // Return an empty struct and an error
-	}
+// 	// Convert string to ObjectID
+// 	objID, err := primitive.ObjectIDFromHex(id)
+// 	if err != nil {
+// 		return model.User{}, err // Return an empty struct and an error
+// 	}
 
-	// Find user by ID
-	var user model.User
-	err = collection.FindOne(context.TODO(), bson.M{"_id": objID}).Decode(&user)
-	return user, err
-}
+// 	// Find user by ID
+// 	var user model.User
+// 	err = collection.FindOne(context.TODO(), bson.M{"_id": objID}).Decode(&user)
+// 	return user, err
+// }
