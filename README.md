@@ -2,7 +2,7 @@
 
 Welcome to the **Elfume API**, a RESTful API built using **Go Fiber**, **MongoDB**, and **JWT Authentication**.
 
-## 📌 Features
+## Features
 - User authentication (Register, Login)
 - Role-based access control
 - Secure JWT authentication with HTTP-only cookies
@@ -11,18 +11,18 @@ Welcome to the **Elfume API**, a RESTful API built using **Go Fiber**, **MongoDB
 
 ## 📌 Installation & Setup
 
-### 1️⃣ **Clone the repository**
+### 1️ **Clone the repository**
 ```sh
 git clone https://github.com/GilangAndhika/elfume.git
 cd elfume
 ```
 
-### 2️⃣ **Install dependencies**
+### 2️ **Install dependencies**
 ```sh
 go mod tidy
 ```
 
-### 3️⃣ **Setup environment variables**
+### 3️ **Setup environment variables**
 Create a `.env` file in the root directory and add:
 ```ini
 MONGO_URI=mongodb+srv://your_user:your_password@your_cluster.mongodb.net/
@@ -30,7 +30,7 @@ MONGO_DB=elfume
 JWT_SECRET=your_secret_key
 ```
 
-### 4️⃣ **Run the application**
+### 4️ **Run the application**
 ```sh
 go run main.go
 ```
@@ -39,7 +39,7 @@ go run main.go
 
 ## 📌 API Endpoints
 
-### 🏠 **Base URL**: `http://localhost:3000`
+### **Base URL**: `http://localhost:3000`
 
 ### **🔑 Authentication**
 | Method | Endpoint         | Description          | Request Body |
@@ -96,7 +96,7 @@ go run main.go
 
 ---
 
-## 📌 Authentication & Security
+## Authentication & Security
 
 - **JWT Authentication**: Tokens are stored in **HTTP-only cookies** to prevent **XSS attacks**.
 - **Protected Routes**: Routes like `/protected` require **valid JWT tokens**.
@@ -105,7 +105,7 @@ To access protected routes, **include the JWT token in cookies**.
 
 ---
 
-## 📌 Run the API with Docker
+## Run the API with Docker
 You can run the API in a **Docker container**:
 ```sh
 docker build -t elfume-api .
@@ -114,18 +114,17 @@ docker run -p 3000:3000 elfume-api
 
 ---
 
-## 📌 Contributors
+## Contributors
 - **Gilang Andhika** - [GitHub](https://github.com/GilangAndhika)
 
 ---
 
-## 📌 License
+## License
 This project is licensed under the **MIT License**.
-```
 
 ---
 
-### **✅ Why This is Useful**
+### ✅ Why This is Useful
 - 📌 **Clear API Documentation** with examples
 - 🔑 **Authentication Details**
 - 🔐 **JWT Usage & Security**
