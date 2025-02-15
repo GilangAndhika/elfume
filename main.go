@@ -3,11 +3,8 @@ package main
 import (
 	"log"
 
-	// "github.com/gilangandhika/elfume/config"
-	// "github.com/gilangandhika/elfume/routes"
-
-	"elfume/config"
-	"elfume/routes"
+	"github.com/GilangAndhika/elfume/config"
+	"github.com/GilangAndhika/elfume/routes"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
@@ -36,9 +33,9 @@ func main() {
 	}))
 
 	app.Use(logger.New(logger.Config{
-		Format: "${time} ${status} - ${latency} ${method} ${path}\n",
+		Format: "${time} ${status} ${message} - ${method} ${path}\n",
 	}))
-	
+
 	// Routes
 	routes.URL(app)
 

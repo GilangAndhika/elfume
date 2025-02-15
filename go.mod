@@ -1,4 +1,4 @@
-module elfume
+module github.com/GilangAndhika/elfume
 
 go 1.22.1
 
@@ -7,7 +7,6 @@ require (
 	github.com/golang-jwt/jwt/v4 v4.5.1
 	github.com/joho/godotenv v1.5.1
 	go.mongodb.org/mongo-driver v1.17.2
-	golang.org/x/crypto v0.26.0
 )
 
 require (
@@ -27,7 +26,8 @@ require (
 	github.com/xdg-go/scram v1.1.2 // indirect
 	github.com/xdg-go/stringprep v1.0.4 // indirect
 	github.com/youmark/pkcs8 v0.0.0-20240726163527-a2c0da244d78 // indirect
-	golang.org/x/sync v0.8.0 // indirect
-	golang.org/x/sys v0.28.0 // indirect
-	golang.org/x/text v0.17.0 // indirect
+	golang.org/x/crypto v0.33.0 // indirect
+	golang.org/x/sync v0.11.0 // indirect
+	golang.org/x/sys v0.30.0 // indirect
+	golang.org/x/text v0.22.0 // indirect
 )
