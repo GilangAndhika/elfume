@@ -7,7 +7,6 @@ import (
 	"os"
 	"time"
 
-	"github.com/joho/godotenv"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -17,10 +16,10 @@ var MongoDB *mongo.Database
 
 // ConnectMongo initializes MongoDB connection
 func ConnectDB() {
-	// Load environment variables
-	if err := godotenv.Load(); err != nil {
-		log.Println("No .env file found, using default environment")
-	}
+	// // Load environment variables
+	// if err := godotenv.Load(); err != nil {
+	// 	log.Println("No .env file found, using default environment")
+	// }
 
 	mongoURI := os.Getenv("MONGO_URL")
 	dbName := os.Getenv("MONGO_DB")
