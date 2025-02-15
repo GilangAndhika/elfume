@@ -50,3 +50,24 @@ func CreatePerfume(perfume *model.Perfume, imageBase64 string, fileName string) 
 
 	return nil
 }
+
+// Get all perfumes from the database
+func GetAllPerfumes() ([]model.Perfume, error) {
+	// Get database connection
+	perfumeCollection := config.MongoDB.Collection("perfumes")
+
+	// Find all perfumes
+	cursor, err := perfumeCollection.Find(context.TODO(), bson.M{})
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch perfumes: %v", err)
+	}
+	defer cursor.Close(context.Background())
+
+	// Decode all perfumes
+	var perfumes []model.Perfume
+	if err = cursor.All(context.Background(), &perfumes); err != nil {
+		return nil, fmt.Errorf("failed to decode perfumes: %v", err)
+	}
+
+	return perfumes, nil
+}

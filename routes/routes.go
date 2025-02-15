@@ -26,6 +26,7 @@ func URL(app *fiber.App) {
 	// Perfume routes
 	PerfumeRoutes := app.Group("/fume")
 	PerfumeRoutes.Post("/create", controller.CreatePerfume)
+	PerfumeRoutes.Get("/all", controller.GetAllPerfumes)
 
 	// Protected route (requires authentication)
 	app.Get("/protected", middleware.JWTMiddleware(), func(c *fiber.Ctx) error {

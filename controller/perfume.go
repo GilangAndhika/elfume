@@ -86,3 +86,16 @@ func readFileAsBase64(file *multipart.FileHeader) (string, error) {
 	// Encode file content to Base64
 	return base64.StdEncoding.EncodeToString(fileBytes), nil
 }
+
+// GetAllPerfumes returns all perfumes from the database
+func GetAllPerfumes(c *fiber.Ctx) error {
+	perfumes, err := repository.GetAllPerfumes()
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"message": "Failed to fetch perfumes",
+			"error":   err.Error(),
+		})
+	}
+
+	return c.JSON(perfumes)
+}
