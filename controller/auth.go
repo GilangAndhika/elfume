@@ -98,6 +98,7 @@ func Registration(ctx *fiber.Ctx) error {
 
 	return ctx.Status(fiber.StatusCreated).JSON(fiber.Map{
 		"message": "Account created successfully",
+		"user":   user,
 	})
 }
 
