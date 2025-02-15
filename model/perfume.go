@@ -3,7 +3,7 @@ package model
 import "go.mongodb.org/mongo-driver/bson/primitive"
 
 type Perfume struct {
-	PerfumeID   primitive.ObjectID `json:"perfume_id" bson:"perfume_id"`
+	PerfumeID   primitive.ObjectID `json:"perfume_id" bson:"_id"`
 	Name        string             `json:"name" bson:"name"`
 	Brand       string             `json:"brand" bson:"brand"`
 	Types       string             `json:"types" bson:"types"`           // Types of the perfume (e.g. Eau de Parfum, Pure Perfume, etc.)
@@ -18,7 +18,7 @@ type Perfume struct {
 }
 
 type FumeImgUpload struct {
-	PerfumeID primitive.ObjectID `json:"perfume_id" bson:"perfume_id"`
+	PerfumeID primitive.ObjectID `json:"perfume_id" bson:"_id"`
 	Image     string             `json:"image" bson:"image"`
 	FileName  string             `json:"file_name" bson:"file_name"`
 }
