@@ -189,3 +189,35 @@ func DeletePerfume(id string) error {
 
 	return nil
 }
+
+// create perfume with image url instead of upload image
+func CreatePerfumeWithImageURL(perfume *model.Perfume) error {
+	// Get database connection
+	perfumeCollection := config.MongoDB.Collection("perfumes")
+
+	// Assign ID and timestamps
+	perfume.PerfumeID = primitive.NewObjectID()
+	perfume.CreatedAt = primitive.NewDateTimeFromTime(time.Now())
+	perfume.UpdatedAt = primitive.NewDateTimeFromTime(time.Now())
+
+	// Insert perfume into the database
+	_, err := perfumeCollection.InsertOne(context.TODO(), bson.M{
+		"_id":         perfume.PerfumeID,
+		"name":        perfume.Name,
+		"brand":       perfume.Brand,
+		"types":       perfume.Types,
+		"categories":  perfume.Categories,
+		"sizes":       perfume.Sizes,
+		"image":       perfume.Image,
+		"price":       perfume.Price,
+		"description": perfume.Description,
+		"stock":       perfume.Stock,
+		"created_at":  perfume.CreatedAt,
+		"updated_at":  perfume.UpdatedAt,
+	})
+	if err != nil {
+		return fmt.Errorf("failed to insert perfume into database: %v", err)
+	}
+
+	return nil
+}

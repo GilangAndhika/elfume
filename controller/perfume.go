@@ -198,3 +198,32 @@ func DeletePerfume(c *fiber.Ctx) error {
 		"message": "Perfume deleted successfully",
 	})
 }
+
+// create perfume without image upload instead of image url
+func CreatePerfumeWithoutImage(c *fiber.Ctx) error {
+	perfume := new(model.Perfume)
+
+	if err := c.BodyParser(perfume); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"message": "Invalid request body",
+			"error":   err.Error(),
+		})
+	}
+
+	perfume.PerfumeID = primitive.NewObjectID()
+	perfume.CreatedAt = primitive.NewDateTimeFromTime(time.Now())
+	perfume.UpdatedAt = primitive.NewDateTimeFromTime(time.Now())
+
+	err := repository.CreatePerfumeWithImageURL(perfume)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"message": "Failed to create perfume",
+			"error":   err.Error(),
+		})
+	}
+
+	return c.Status(fiber.StatusCreated).JSON(fiber.Map{
+		"message": "Perfume created successfully",
+		"perfume": perfume,
+	})
+}

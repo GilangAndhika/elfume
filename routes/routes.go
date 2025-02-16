@@ -34,6 +34,7 @@ func URL(app *fiber.App) {
 	// Perfume routes
 	PerfumeRoutes := app.Group("/fume")
 	PerfumeRoutes.Post("/create", controller.CreatePerfume)
+	PerfumeRoutes.Post("/insert", controller.CreatePerfumeWithoutImage)
 	PerfumeRoutes.Get("/all", controller.GetAllPerfumes)
 	PerfumeRoutes.Get("/id/:id", controller.GetPerfumeByID)
 	PerfumeRoutes.Get("/search", controller.GetFilteredPerfumes)
